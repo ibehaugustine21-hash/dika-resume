@@ -1,0 +1,1222 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Dika's Portfolio</title>
+	<meta name="description" content="Dika's portfolio — resume, projects, photos and videos. View and upload media; live clock and quick resume access.">
+	<meta name="robots" content="index, follow">
+	<meta property="og:title" content="Dika's Portfolio">
+	<meta property="og:description" content="Explore Dika's resume, projects, photos and videos.">
+	<meta property="og:type" content="website">
+	<meta name="twitter:card" content="summary_large_image">
+	<script type="application/ld+json">
+		{"@context":"https://schema.org","@type":"Person","name":"Dika","description":"Portfolio site for Dika","url":"https://example.com"}
+	</script>
+	<style>
+		:root{--bg:#071A3D;--accent1:#ff4b4b;--accent2:#ffd93d;--accent3:#ff8fb1;--accent4:#7b61ff}
+		html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+		body{background:var(--bg);color:#fff}
+
+		/* Welcome overlay (colorful while keeping page milky) */
+		.welcome-overlay{position:fixed;inset:0;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-start;flex-direction:column;z-index:9999;transition:opacity .8s ease, visibility .8s;padding:6vh 1rem;max-height:100vh;max-height:100dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+		.welcome-overlay::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,107,107,0.18), rgba(255,217,61,0.18), rgba(107,255,217,0.18), rgba(123,97,255,0.18));backdrop-filter:blur(6px);}
+		.welcome-overlay::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(255,107,107,0.06), transparent 10%), radial-gradient(circle at 80% 80%, rgba(123,97,255,0.06), transparent 15%);}
+		.welcome-overlay > :not(.welcome-art){position:relative;z-index:1}
+		.welcome-hidden{opacity:0;visibility:hidden;pointer-events:none}
+		.welcome-art{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.12;pointer-events:none}
+			.title{width:100%;font-size:clamp(2.2rem,6vw,5rem);font-weight:800;text-align:center;line-height:1;margin-bottom:.15rem}
+			#welcome-count{margin-top:.35rem;font-size:1.25rem;font-weight:900;color:#fff}
+			/* Bio area shown on welcome beneath title and countdown */
+			.welcome-bio{box-sizing:border-box;width:100%;max-width:960px;margin-top:1rem;background:rgba(255,255,255,0.03);padding:1rem 1.25rem;border-radius:10px;color:rgba(255,255,255,0.95);font-size:clamp(0.95rem,1.6vw,1.05rem);line-height:1.5;box-shadow:0 12px 30px rgba(0,0,0,0.25);text-align:left}
+			.welcome-bio h3{margin-top:0;margin-bottom:.35rem;font-size:1.1rem}
+			.welcome-bio ul{margin:0.5rem 0 0 1.2rem}
+			.welcome-side-controls{align-self:flex-start;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.6rem;z-index:10002}
+			.skip-btn{position:static;transform:none;background:linear-gradient(90deg,#ffffff,#ffd93d);color:#071A3D;border:none;padding:.45rem .8rem;border-radius:8px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.18);white-space:nowrap}
+			#skip-welcome{position:static;transform:none;z-index:10002}
+			.skip-btn:active{transform:translateY(1px)}
+			.welcome-media-counter{position:static!important;display:none;background:linear-gradient(90deg,var(--accent2),var(--accent4));color:#111;padding:.45rem .7rem;border-radius:8px;font-weight:800;box-shadow:0 6px 18px rgba(123,97,255,.12)}
+			/* Subtle custom scrollbar for the welcome overlay */
+			.welcome-overlay{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent}
+			.welcome-overlay::-webkit-scrollbar{width:10px}
+			.welcome-overlay::-webkit-scrollbar-track{background:transparent}
+			.welcome-overlay::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.06));border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+			.welcome-overlay::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.12))}
+		.title .gradient{
+			background:linear-gradient(90deg,var(--accent1),var(--accent2),var(--accent3));
+			-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% 200%;animation:slide 6s linear infinite
+		}
+		@keyframes slide{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+		/* Top-right clock */
+		#clock{position:fixed;top:12px;right:16px;background:linear-gradient(90deg,var(--accent2),var(--accent4));color:#fff;backdrop-filter:blur(6px);padding:.35rem .6rem;border-radius:10px;font-weight:700;z-index:10000;box-shadow:0 6px 18px rgba(123,97,255,.12);text-shadow:0 1px 0 rgba(0,0,0,.12)}
+		#clock .clock-date{display:block;font-size:0.78rem;font-weight:700;line-height:1}
+		#clock .clock-time{display:block;font-size:0.95rem;font-weight:900;margin-top:2px}
+
+		/* Page layout */
+		main{max-width:900px;margin:6rem auto 4rem;padding:1rem}
+		/* Hidden state for main while welcome shows */
+		.hidden{visibility:hidden;opacity:0;pointer-events:none}
+		form[role=search]{margin:1rem 0}
+		.cv-section{margin-top:2rem;position:relative;min-height:100vh;background:linear-gradient(180deg,#0b3b2f,#083022);display:block;padding:3.5rem 1rem 1rem;box-sizing:border-box;color:#fff}
+		.cv-embed{display:none}
+		.cv-header{position:absolute;top:12px;right:72px;display:flex;gap:.5rem;align-items:center;z-index:20}
+		.resume-left{position:relative}
+		#return-home.home-left{background:linear-gradient(90deg,#ff6161,#e03131);color:#fff;border:none;padding:.25rem .6rem;font-size:.85rem;min-height:30px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);display:inline-block;margin-bottom:.6rem}
+		#return-home{width:auto;height:auto}
+		.cv-controls{display:flex;gap:.5rem;align-items:center}
+		.cv-controls a,.cv-controls button{background:linear-gradient(90deg,var(--accent2),var(--accent4));color:#111;padding:.45rem .7rem;border-radius:8px;border:none;font-weight:700;text-decoration:none;cursor:pointer;box-shadow:0 6px 18px rgba(123,97,255,.08)}
+		.cv-controls button{background:linear-gradient(90deg,var(--accent1),var(--accent3));color:#fff}
+		.cv-settings{position:absolute;top:12px;right:12px;z-index:30}
+		.settings-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+		.settings-menu{position:absolute;top:54px;right:0;background:#000;border:1px solid rgba(255,255,255,0.14);padding:0;border-radius:8px;display:none;min-width:220px;max-height:80vh;max-height:min(80dvh,680px);overflow-x:hidden;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+		.settings-menu a,.settings-menu button{display:block;width:100%;text-align:left;padding:.55rem .65rem;border-radius:0;border:none;background:transparent;color:#fff;text-decoration:none;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s;font-size:.95rem}
+		.settings-menu a:hover,.settings-menu button:hover{background:rgba(255,255,255,0.08)}
+		.settings-menu a:last-child,.settings-menu button:last-child{border-bottom:none}
+		.portfolio-link-input{box-sizing:border-box;width:100%;max-width:100%;margin-top:.65rem;padding:.55rem .65rem;border:1px solid #aab3c2;border-radius:4px}
+		.settings-menu-label{display:block;padding:0 .65rem;margin:.3rem 0;color:rgba(255,255,255,.72);font-size:.85rem}
+		.settings-menu .portfolio-link-input{width:calc(100% - 1.3rem);margin:0 .65rem .55rem}
+		.settings-menu .technician-writeup-input{box-sizing:border-box;width:calc(100% - 1.3rem);min-height:140px;margin:0 .65rem .55rem;padding:.6rem;border:1px solid rgba(255,255,255,.24);border-radius:4px;background:#111;color:#fff;font:inherit;line-height:1.45;resize:vertical}
+		.portfolio-link-display{display:none;margin:.45rem 0 0;padding:.55rem .65rem;overflow-wrap:anywhere;background:rgba(255,255,255,.08);border-radius:4px}
+		.portfolio-link-list{margin:0;padding:0;list-style:none}
+		.portfolio-link-list li{display:flex;align-items:center;gap:.5rem;min-width:0}
+		.portfolio-link-list li+li{margin-top:.45rem}
+		.portfolio-link-value{flex:1;min-width:0;overflow-wrap:anywhere}
+		.portfolio-link-copy{width:auto!important;flex:0 0 auto;padding:.3rem .55rem!important;border:1px solid rgba(255,255,255,.22)!important;border-radius:4px!important;background:rgba(255,255,255,.1)!important;color:#fff!important;font-size:.85rem!important}
+		.technician-notebook-button{display:block;width:100%;margin-top:1rem;padding:.85rem 1rem;border:0;border-radius:8px;background:linear-gradient(105deg,#e34f6f,#f0a53a 52%,#23a9a3);color:#fff;font-size:1rem;font-weight:800;text-align:left;box-shadow:0 7px 18px rgba(0,0,0,.22);cursor:pointer}
+		.technician-notebook-button:hover{filter:brightness(1.08)}
+		.notebook-overlay{position:fixed;inset:0;z-index:20000;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.72)}
+		.notebook-page{box-sizing:border-box;width:min(760px,100%);max-height:88vh;max-height:88dvh;overflow-y:auto;padding:1.25rem 1.4rem 1.5rem 3.4rem;border:1px solid #d7d5c9;border-radius:6px;background-color:#fffdf4;background-image:linear-gradient(90deg,transparent 0,transparent 2.35rem,rgba(204,75,75,.46) 2.35rem,rgba(204,75,75,.46) 2.42rem,transparent 2.42rem),repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(76,137,191,.2) 32px);color:#1d2733;box-shadow:0 18px 60px rgba(0,0,0,.42)}
+		.notebook-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:2px solid rgba(194,69,69,.28)}
+		.notebook-kicker{font-size:.72rem;font-weight:800;color:#a34444;text-transform:uppercase}
+		.notebook-header h2{margin:.2rem 0 0;font-size:1.35rem;line-height:1.25;color:#183c55}
+		.notebook-close{flex:0 0 auto;padding:.45rem .7rem;border:1px solid #718394;border-radius:4px;background:#fff;color:#183c55;font-weight:700;cursor:pointer}
+		.notebook-empty{color:#516170;font-style:italic}
+		.notebook-writing{min-height:180px;color:#253b4e;font-family:Georgia,'Times New Roman',serif;font-size:1.03rem;line-height:2;white-space:pre-wrap;overflow-wrap:anywhere}
+		.settings-menu-divider{height:1px;background:rgba(255,255,255,0.08);margin:.25rem 0}
+		.settings-menu-section{padding:.35rem 0;color:rgba(255,255,255,0.5);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding-left:.65rem;padding-right:.65rem;padding-top:.45rem}
+		.settings-quick-actions{display:none;align-items:center;justify-content:space-around;gap:.5rem;padding:.5rem;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(0,0,0,0.12)}
+		.settings-quick-actions.visible{display:flex}
+		.settings-quick-action{width:42px;height:42px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;transition:transform 0.2s ease,background 0.2s ease}
+		.settings-quick-action:hover{transform:translateY(-1px);background:linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.08))}
+		.cv-avatar{position:absolute;top:12px;right:140px;width:84px;height:84px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,0.12);z-index:20}
+		/* Resume layout */
+		.resume-grid{display:flex;gap:2rem;align-items:flex-start}
+		.resume-left{flex:0 0 320px}
+		.resume-right{flex:1}
+		.resume-name{font-size:1.6rem;line-height:1;letter-spacing:0.02em;font-weight:900}
+		.resume-summary{border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.04);padding:1rem 0;margin:1rem 0;color:rgba(255,255,255,0.85)}
+		.resume-section h2{margin:.5rem 0;border-bottom:1px solid rgba(255,255,255,0.04);padding-bottom:.25rem}
+		.resume-list{margin:0;padding-left:1rem;color:rgba(255,255,255,0.9)}
+		.resume-contact{margin-top:1.5rem;color:rgba(255,255,255,0.9);font-weight:700}
+		@media (max-width:800px){
+			.resume-grid{flex-direction:column}
+			.resume-left{flex:auto}
+		}
+		/* Responsive tweaks for the welcome screen */
+		@media (max-width:800px){
+			.welcome-overlay{padding-top:4vh}
+			.title{font-size:clamp(1.8rem,8vw,3rem)}
+			.welcome-bio{padding:.75rem;font-size:0.98rem;margin:.75rem 0 0}
+			.welcome-art{opacity:0.08}
+		}
+		@media (max-width:480px){
+			.welcome-overlay{padding-top:3vh}
+			.title{font-size:clamp(1.6rem,9vw,2.2rem)}
+			#welcome-count{font-size:1rem;margin-top:.25rem}
+			.welcome-bio{font-size:0.95rem;padding:.65rem;margin:.5rem 0 0}
+			.cv-avatar{width:64px;height:64px;right:120px}
+			#session-count{right:108px}
+		}
+		@media (max-width:600px){.cv-embed{height:520px}}
+		@media (max-width:768px){
+			main{margin:5rem auto 2rem;padding:.75rem}
+			.cv-section{padding:4.25rem .75rem 1rem;min-height:auto}
+			.cv-avatar{top:10px;right:94px;width:68px;height:68px}
+			.settings-quick-actions{gap:.35rem;padding:.35rem}
+			.settings-quick-action{width:36px;height:36px;font-size:1rem}
+			.settings-menu{min-width:180px;right:-2px}
+			.resume-grid{gap:1rem}
+			.resume-name{font-size:1.2rem}
+			#contact p{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .5rem}
+		}
+		@media (max-width:520px){
+			#clock{top:8px;right:8px;padding:.25rem .45rem}
+			#session-count{top:8px;right:112px;padding:.25rem .45rem;font-size:.72rem}
+			main{margin-top:4.5rem}
+			.cv-section{padding-top:4rem}
+			.cv-settings{right:8px;top:8px}
+			.cv-avatar{right:78px;top:10px;width:62px;height:62px}
+			.settings-menu{top:50px;min-width:170px}
+			.resume-contact{font-size:.9rem;line-height:1.5}
+			#contact{padding:.8rem}
+			.notebook-overlay{padding:.5rem}
+			.notebook-page{padding:1rem .8rem 1.2rem 2.55rem;background-image:linear-gradient(90deg,transparent 0,transparent 1.75rem,rgba(204,75,75,.46) 1.75rem,rgba(204,75,75,.46) 1.82rem,transparent 1.82rem),repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(76,137,191,.2) 32px)}
+			.notebook-header h2{font-size:1.15rem}
+		}
+
+		.media-number{position:absolute;top:5px;left:5px;z-index:1;min-width:24px;padding:.2rem .35rem;border-radius:4px;background:rgba(0,0,0,.82);color:#fff;text-align:center;font-size:.85rem;font-weight:700}
+		.copy-btn{background:linear-gradient(90deg,var(--accent2),var(--accent4));color:#111;padding:.25rem .5rem;border-radius:6px;border:none;font-weight:700;cursor:pointer}
+		/* Contact styling: dark green background with red text */
+		#contact{background:linear-gradient(180deg,#0b3b2f,#083022);padding:1rem;border-radius:8px;color:#ff4b4b;margin-top:1.25rem}
+		#contact strong,#contact a,#contact span{color:#ff4b4b}
+		#contact .copy-btn{background:rgba(255,255,255,0.12);color:#fff;padding:.25rem .5rem;border-radius:6px;border:none}
+
+		/* Modal for password entry */
+		.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:20001}
+		.modal-box{background:linear-gradient(180deg,#0f2b24,#06221b);padding:1rem;border-radius:10px;color:#fff;max-width:420px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 12px 30px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.04)}
+		.modal-box h3{margin:0 0 .5rem;font-size:1.05rem}
+		.modal-box p{margin:0 0 .75rem;color:rgba(255,255,255,0.85)}
+		.modal-input{width:100%;padding:.5rem;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.06);color:#fff}
+		.modal-actions{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end;margin-top:.75rem}
+		.modal-actions .settings-btn{width:auto;height:auto;min-height:40px;padding:.5rem .7rem;white-space:normal}
+		.numbered-delete-list{max-height:36vh;overflow-y:auto;margin:.5rem 0 .75rem;padding-left:1.5rem}
+		.numbered-delete-list li{overflow-wrap:anywhere;padding:.2rem 0}
+		.numbered-delete-label{display:block;margin:.5rem 0 .3rem;font-weight:600}
+		.numbered-delete-error{min-height:1.2rem;margin:.35rem 0 0!important;color:#ffaaaa!important;font-size:.9rem}
+	</style>
+</head>
+<body>
+
+	<div id="clock" aria-live="polite">--:--:--</div>
+	<div id="session-count" aria-live="polite" style="position:fixed;top:12px;right:140px;background:rgba(255,255,255,0.06);padding:.35rem .6rem;border-radius:8px;color:#fff;font-weight:700;z-index:10000;display:none">01:00:00</div>
+
+	<div id="welcome" class="welcome-overlay">
+		<div class="welcome-side-controls" aria-label="Welcome page controls">
+			<button id="skip-welcome" class="skip-btn" aria-label="Skip intro">Skip</button>
+			<div id="media-counter" class="welcome-media-counter" aria-live="polite">0 media</div>
+		</div>
+		<svg class="welcome-art" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+			<!-- monitor -->
+			<rect x="140" y="70" width="420" height="260" rx="18" ry="18" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="6"/>
+			<rect x="170" y="110" width="360" height="200" rx="10" ry="10" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
+			<rect x="320" y="330" width="80" height="12" rx="4" ry="4" fill="rgba(255,255,255,0.9)"/>
+			<!-- screwdriver -->
+			<g transform="translate(700,120) rotate(-18)">
+				<rect x="0" y="0" width="10" height="140" rx="4" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="6"/>
+				<ellipse cx="5" cy="-10" rx="18" ry="10" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,0.6)" stroke-width="3"/>
+			</g>
+			<!-- little code snippet -->
+			<g transform="translate(560,210)">
+				<rect x="0" y="0" width="220" height="110" rx="8" ry="8" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="4"/>
+				<text x="18" y="34" fill="rgba(255,255,255,0.9)" font-family="monospace" font-size="28">const hello = 'hi';</text>
+				<text x="18" y="68" fill="rgba(255,255,255,0.8)" font-family="monospace" font-size="24">&lt;div&gt;code&lt;/div&gt;</text>
+			</g>
+		</svg>
+		<div class="title"><span class="gradient">Dika's Portfolio</span></div>
+		<div id="welcome-count" aria-live="polite">Welcome — 10s</div>
+		<div class="welcome-bio" role="region" aria-label="Introduction">
+			<h3>Welcome to My Portfolio</h3>
+			<p>Hello, I am Ibeh Onyedikachukwu Augustine, a dedicated Computer Hardware Technician, IT Support enthusiast, and aspiring Web Developer with practical experience in computer maintenance, repair, troubleshooting, and digital solutions.</p>
+			<p>I have hands-on experience diagnosing and repairing computer faults, installing and configuring operating systems, maintaining computer systems, upgrading hardware components, and providing technical support to users.</p>
+			<p>Beyond computer hardware, I have developed skills in website creation and web development. I can design and build responsive websites, create personal portfolios, structure web pages using HTML and CSS, improve website appearance, and develop digital platforms that help individuals and businesses showcase their ideas online.</p>
+			<p>My experience working with computer systems has helped me develop strong problem-solving skills, attention to detail, and the ability to create practical technology solutions.</p>
+			<p><strong>What I Can Do:</strong></p>
+			<ul>
+				<li>Computer hardware repair and troubleshooting</li>
+				<li>Laptop and desktop maintenance</li>
+				<li>Windows installation and system configuration</li>
+				<li>Software installation and setup</li>
+				<li>Hardware upgrades and performance improvement</li>
+				<li>ICT support and computer management</li>
+				<li>Website creation and design</li>
+				<li>HTML and CSS website development</li>
+				<li>Personal portfolio website creation</li>
+				<li>Basic web customization and improvements</li>
+				<li>Technical problem solving and IT support</li>
+			</ul>
+			<p>I am passionate about technology, continuous learning, and creating solutions that make life easier through computers and the internet.</p>
+			<p>This portfolio showcases my skills, projects, and my journey in the world of IT, hardware repair, and web development.</p>
+		</div>
+	</div>
+
+	<main class="hidden">
+		<section class="search-region" aria-label="Search and portfolio link">
+		<!-- Search input -->
+		<form role="search" aria-label="Site search" style="padding:0 1rem;">
+			<label for="search-dika" style="display:block;margin-bottom:.25rem;font-weight:600">Search</label>
+			<input id="search-dika" name="dika tech portfolio" type="search" placeholder="Search the portfolio..." style="width:100%;padding:.5rem;border:1px solid #ccc;border-radius:4px;" />
+		</form>
+		<div style="padding:0 1rem;margin-top:-.5rem">
+			<div id="portfolio-link-display" class="portfolio-link-display"><ol id="portfolio-link-list" class="portfolio-link-list"></ol></div>
+		</div>
+		</section>
+
+		<!-- CV / Resume section -->
+		<section id="cv" class="cv-section">
+			<div class="cv-settings">
+				<button class="settings-btn" id="settings-toggle" aria-haspopup="true" aria-expanded="false" title="Settings">
+					<!-- gear icon -->
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 0 1 2.3 16.9l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L4.3 2.3A2 2 0 0 1 7.13.47l.06.06A1.65 1.65 0 0 0 9 1.26c.5.2 1.05.33 1.6.33.55 0 1.1-.12 1.6-.33a1.65 1.65 0 0 0 1.81-.33l.06-.06A2 2 0 0 1 19.4 4.3l-.06.06a1.65 1.65 0 0 0-.33 1.82c.2.5.33 1.05.33 1.6 0 .55.12 1.1.33 1.6.2.5.55 1.05.33 1.6z"></path></svg>
+				</button>
+				<div class="settings-menu" id="settings-menu" role="menu" aria-hidden="true">
+					<div class="settings-quick-actions" id="settings-quick-actions" aria-label="Quick settings actions">
+						<button type="button" class="settings-quick-action" id="quick-profile-picture" title="Change profile picture" aria-label="Change profile picture">🖼️</button>
+						<button type="button" class="settings-quick-action" id="quick-upload-video" title="Upload videos" aria-label="Upload videos">🎬</button>
+						<button type="button" class="settings-quick-action" id="quick-change-password" title="Change password" aria-label="Change password">🔐</button>
+					</div>
+					<div class="settings-menu-section">Profile & Security</div>
+					<button id="change-profile-image" role="menuitem">🖼️ Change profile picture</button>
+					<button id="upload-video-btn" role="menuitem">🎬 Upload videos</button>
+					<button id="change-password-btn" role="menuitem">🔐 Change password</button>
+					<div class="settings-menu-divider"></div>
+					<div class="settings-menu-section">Uploaded Media</div>
+					<button id="upload-media-btn" role="menuitem">📤 Upload to Archive</button>
+					<button id="clear-storage-btn" role="menuitem">🗑️ Clear Storage</button>
+					<div class="settings-menu-divider"></div>
+					<div class="settings-menu-section">Portfolio Link</div>
+					<label class="settings-menu-label" for="portfolio-link-input">Paste a portfolio link</label>
+					<input id="portfolio-link-input" class="portfolio-link-input" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com" />
+					<button id="save-portfolio-link" type="button" role="menuitem">🔗 Save Portfolio Link</button>
+					<button id="delete-portfolio-link" type="button" role="menuitem">🗑️ Delete Portfolio Link</button>
+					<div class="settings-menu-divider"></div>
+					<div class="settings-menu-section">Computer Wizard Write-up</div>
+					<label class="settings-menu-label" for="technician-writeup-input">Paste a new write-up</label>
+					<textarea id="technician-writeup-input" class="technician-writeup-input" rows="7" placeholder="Paste the updated technician write-up here"></textarea>
+					<button id="save-technician-writeup" type="button" role="menuitem">📓 Save Write-up</button>
+					<div id="technician-writeup-status" class="settings-menu-label" role="status" aria-live="polite"></div>
+					<div class="settings-menu-divider"></div>
+					<div class="settings-menu-section">Document</div>
+					<a id="download-cv" href="Resume%20Document%20Medium%20(1).pdf" download role="menuitem">📥 Download PDF</a>
+					<button id="print-resume" role="menuitem">🖨️ Print</button>
+				</div>
+
+			</div>
+			<img src="avatar.jpg" alt="Dika" class="cv-avatar" id="cv-avatar" />
+			<!-- Avatar upload and crop UI (hidden by default) -->
+			<input id="avatar-input" type="file" accept="image/*" style="display:none" />
+			<div id="avatar-crop-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:20000">
+				<div style="background:#fff;padding:1rem;border-radius:8px;max-width:520px;width:92%;color:#111">
+					<h3 style="margin-top:0">Crop Avatar</h3>
+					<canvas id="avatar-canvas" width="320" height="320" style="width:100%;max-width:320px;border:1px solid #ddd;display:block;margin:0 auto 1rem"></canvas>
+					<div style="display:flex;gap:.5rem;justify-content:center">
+						<button id="save-avatar" class="settings-btn" style="background:linear-gradient(90deg,var(--accent1),var(--accent3));color:#fff">Save Avatar</button>
+						<button id="cancel-avatar" class="settings-btn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff">Cancel</button>
+					</div>
+					<p style="font-size:.85rem;color:#333;margin-top:.75rem;text-align:center">The crop is square and will be centered automatically. You can change the avatar anytime.</p>
+				</div>
+			</div>
+			<div style="padding-top:0.25rem" id="resume-content">
+				<div class="resume-grid">
+						<div class="resume-left">
+							<button id="return-home" class="settings-btn home-left" title="Return to Home">Home</button>
+							<div class="resume-name">IBEH<br>
+						ONYEDIKACHUKWU<br>
+						AUGUSTINE</div>
+						<p class="resume-summary">A dedicated and hardworking individual with practical experience in computer maintenance and repair, seeking an opportunity to apply my technical skills in a professional environment. I am eager to learn, grow, and contribute positively to any organization I join.</p>
+
+						<div class="resume-section" aria-label="Education">
+							<h2>EDUCATION</h2>
+							<div style="margin-bottom:.5rem">
+								<strong>ST. MICHAEL MODEL COMPREHENSIVE SECONDARY SCHOOL, NIMO</strong><br>
+								Senior Secondary Education — 2020–2024
+							</div>
+							<div style="margin-bottom:.5rem">
+								<strong>CHRIST THE KING SECONDARY SCHOOL, AKABO/WPRI</strong><br>
+								Junior Secondary Education
+							</div>
+							<div>
+								<strong>PSALM 23 NURSERY AND PRIMARY SCHOOL, BENIN CITY</strong><br>
+								Primary Education — 2008–2014
+							</div>
+						</div>
+
+						<div class="resume-section" aria-label="Skills">
+							<h2>SKILLS</h2>
+							<ul class="resume-list">
+								<li>Computer hardware repair and troubleshooting</li>
+								<li>System maintenance and support</li>
+								<li>Basic IT support and computer management</li>
+								<li>Problem-solving skills</li>
+								<li>Fast learner and adaptable</li>
+								<li>Good communication skills</li>
+							</ul>
+						</div>
+
+						<div class="resume-contact">
+							09134626263 &nbsp;&nbsp; | &nbsp;&nbsp; www.reallygreatsite.com &nbsp;&nbsp; | &nbsp;&nbsp; ibehaugustine21@gmail.com
+						</div>
+					</div>
+
+					<div class="resume-right">
+						<div class="resume-section" aria-label="Experience">
+							<h2>EXPERIENCE</h2>
+							<div style="margin-bottom:.5rem">
+								<strong>Computer Manager — Secondary School</strong> — 2025
+								<ul class="resume-list">
+									<li>Managed school computer systems and ensured proper functioning</li>
+									<li>Assisted teachers and students with computer operations</li>
+									<li>Performed basic system maintenance</li>
+								</ul>
+							</div>
+
+							<div style="margin-bottom:.5rem">
+								<strong>Computer Repair Assistant — Secondary School</strong>
+								<ul class="resume-list">
+									<li>Diagnosed and repaired faulty computers</li>
+									<li>Carried out routine maintenance and hardware support</li>
+									<li>Ensured systems were always functional for school use</li>
+								</ul>
+							</div>
+						</div>
+
+						<div class="resume-section" aria-label="Professional Training">
+							<h2>PROFESSIONAL TRAINING</h2>
+							<div style="margin-bottom:.5rem">
+								<strong>Osayuhi Computer Maintenance and Repair Training, Benin City</strong>
+								<p style="margin:.25rem 0;color:rgba(255,255,255,0.85)">Computer hardware troubleshooting; practical hands-on training in computer servicing.</p>
+							</div>
+							<div>
+								<strong>Basic Information Literacy Course — Certified Learner</strong>
+								<p style="margin:.25rem 0;color:rgba(255,255,255,0.85)">How to research, evaluate, and use information effectively — completed and certified online course.</p>
+							</div>
+						</div>
+						<button id="open-technician-notebook" type="button" class="technician-notebook-button">✦ Read the Updated Computer Technician Wizard</button>
+					</div>
+				</div>
+			</div>
+
+			<section id="contact" style="margin-top:1.25rem" aria-label="Contact information">
+				<h3 style="margin:0 0 .5rem 0">Contact</h3>
+				<p><strong>Email:</strong>
+					<span id="email-text">ibehaugustine21@gmail.com</span>
+					<a href="mailto:ibehaugustine21@gmail.com" style="margin-left:.5rem">Send</a>
+					<button id="copy-email" class="copy-btn" aria-label="Copy email" style="margin-left:.5rem">Copy</button>
+				</p>
+				<p><strong>Phone:</strong>
+					<span id="phone-text">09134626263</span>
+					<a href="tel:+2349134626263" style="margin-left:.5rem">Call</a>
+					<button id="copy-phone" class="copy-btn" aria-label="Copy phone" style="margin-left:.5rem">Copy</button>
+				</p>
+			</section>
+		</section>
+		<div id="technician-notebook-overlay" class="notebook-overlay" aria-hidden="true">
+			<article class="notebook-page" role="dialog" aria-modal="true" aria-labelledby="technician-notebook-title">
+				<header class="notebook-header">
+					<div>
+						<div class="notebook-kicker">Computer Wizard Field Notes</div>
+						<h2 id="technician-notebook-title">The Updated Computer Technician Wizard</h2>
+					</div>
+					<button id="close-technician-notebook" type="button" class="notebook-close">Close</button>
+				</header>
+				<p id="technician-writeup-empty" class="notebook-empty">The updated write-up will appear here when it has been saved in Settings.</p>
+				<div id="technician-writeup-content" class="notebook-writing"></div>
+			</article>
+		</div>
+
+		<!-- Media Storage & Archive Section -->
+		<section id="media-storage" class="cv-section" style="background:linear-gradient(180deg,#1a1f3a,#0d1929);margin-top:0;min-height:auto">
+			<h2 style="font-size:1.8rem;margin-top:0;margin-bottom:1.5rem;border-bottom:2px solid rgba(255,255,255,0.1);padding-bottom:.5rem">Uploaded Media Archive</h2>
+			<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;max-height:600px;overflow-y:auto;padding:.5rem">
+				<div id="storage-gallery" style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:1rem">
+					<!-- Media items will be added here -->
+				</div>
+			</div>
+			<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:1rem;flex-wrap:wrap">
+				<div style="margin-left:auto;color:rgba(255,255,255,0.7);font-size:.9rem;display:flex;align-items:center">
+					<span id="storage-info">0 / 600 media items</span>
+				</div>
+			</div>
+			<input id="storage-file-input" type="file" accept="image/*,video/*" multiple style="display:none" />
+		</section>
+	</main>
+
+	<script>
+		// Clock
+		function updateClock(){
+			const el = document.getElementById('clock');
+			const now = new Date();
+			const date = now.toLocaleDateString(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+			const time = now.toLocaleTimeString();
+			if(el) el.innerHTML = `<div class="clock-date">${date}</div><div class="clock-time">${time}</div>`;
+		}
+		updateClock();setInterval(updateClock,1000);
+
+		// Print button: attempt to print the embedded PDF, fallback to window.print()
+		const printBtn = document.getElementById('print-btn');
+		if(printBtn){
+			printBtn.addEventListener('click',()=>{
+				const iframe = document.querySelector('.cv-embed');
+				try{
+					if(iframe && iframe.contentWindow) iframe.contentWindow.print();
+					else window.print();
+				}catch(e){ window.print(); }
+			});
+		}
+
+		// Copy-to-clipboard for contact info
+		function flashButton(btn){
+			const orig = btn.textContent;
+			btn.textContent = 'Copied!';
+			btn.disabled = true;
+			setTimeout(()=>{ btn.textContent = orig; btn.disabled = false; },1500);
+		}
+		const copyEmail = document.getElementById('copy-email');
+		const copyPhone = document.getElementById('copy-phone');
+		if(copyEmail){
+			copyEmail.addEventListener('click',()=>{
+				const txt = document.getElementById('email-text').textContent.trim();
+				navigator.clipboard.writeText(txt).then(()=>flashButton(copyEmail));
+			});
+		}
+		if(copyPhone){
+			copyPhone.addEventListener('click',()=>{
+				const txt = document.getElementById('phone-text').textContent.trim();
+				navigator.clipboard.writeText(txt).then(()=>flashButton(copyPhone));
+			});
+		}
+
+		// Settings menu toggle and print/download handlers (uses modal for password input)
+		const settingsToggle = document.getElementById('settings-toggle');
+		const settingsMenu = document.getElementById('settings-menu');
+		const settingsQuickActions = document.getElementById('settings-quick-actions');
+		const printResumeBtn = document.getElementById('print-resume');
+		const uploadVideoBtn = document.getElementById('upload-video-btn');
+		const quickUploadVideoBtn = document.getElementById('quick-upload-video');
+		const quickChangePasswordBtn = document.getElementById('quick-change-password');
+		const changeProfileBtn = document.getElementById('change-profile-image');
+		const quickProfileBtn = document.getElementById('quick-profile-picture');
+		const portfolioLinkInput = document.getElementById('portfolio-link-input');
+		const portfolioLinkDisplay = document.getElementById('portfolio-link-display');
+		const portfolioLinkList = document.getElementById('portfolio-link-list');
+		const savePortfolioLinkBtn = document.getElementById('save-portfolio-link');
+		const deletePortfolioLinkBtn = document.getElementById('delete-portfolio-link');
+		const technicianWriteupInput = document.getElementById('technician-writeup-input');
+		const saveTechnicianWriteupBtn = document.getElementById('save-technician-writeup');
+		const technicianWriteupStatus = document.getElementById('technician-writeup-status');
+		const technicianNotebookOverlay = document.getElementById('technician-notebook-overlay');
+		const technicianNotebookContent = document.getElementById('technician-writeup-content');
+		const technicianNotebookEmpty = document.getElementById('technician-writeup-empty');
+		const TECHNICIAN_WRITEUP_KEY = 'dika_technician_writeup';
+		const PORTFOLIO_LINKS_KEY = 'dika_portfolio_links';
+		let portfolioLinks = [];
+
+		function normalizePortfolioLink(value){
+			const link = new URL(value);
+			if(link.protocol !== 'http:' && link.protocol !== 'https:') throw new Error('Unsupported link protocol');
+			return link.href;
+		}
+
+		function renderPortfolioLinks(){
+			portfolioLinkList.replaceChildren();
+			portfolioLinks.forEach((value,index)=>{
+				const item = document.createElement('li');
+				const linkText = document.createElement('span');
+				linkText.className = 'portfolio-link-value';
+				linkText.textContent = (index + 1) + '. ' + value;
+				const copyButton = document.createElement('button');
+				copyButton.type = 'button';
+				copyButton.className = 'portfolio-link-copy';
+				copyButton.textContent = 'Copy';
+				copyButton.setAttribute('aria-label','Copy portfolio link ' + (index + 1));
+				copyButton.addEventListener('click',async()=>{
+					try{
+						if(navigator.clipboard && navigator.clipboard.writeText){
+							await navigator.clipboard.writeText(value);
+						} else {
+							const copyField = document.createElement('textarea');
+							copyField.value = value;
+							copyField.style.position = 'fixed';
+							copyField.style.opacity = '0';
+							document.body.appendChild(copyField);
+							copyField.select();
+							const copied = document.execCommand('copy');
+							copyField.remove();
+							if(!copied) throw new Error('Clipboard copy failed');
+						}
+						copyButton.textContent = 'Copied';
+						setTimeout(()=>{ copyButton.textContent = 'Copy'; },1500);
+					}catch(e){ alert('Could not copy this link. Please try again.'); }
+				});
+				item.append(linkText,copyButton);
+				portfolioLinkList.appendChild(item);
+			});
+			portfolioLinkDisplay.style.display = portfolioLinks.length ? 'block' : 'none';
+		}
+
+		function showNumberedDeleteDialog(title,description,items,onDelete,onDeleteAll){
+			const overlay = document.createElement('div');
+			overlay.id = 'numbered-delete-modal';
+			overlay.className = 'modal-overlay';
+			overlay.innerHTML = `
+				<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="numbered-delete-title">
+					<h3 id="numbered-delete-title"></h3>
+					<p id="numbered-delete-description"></p>
+					<ol id="numbered-delete-items" class="numbered-delete-list"></ol>
+					<label class="numbered-delete-label" for="numbered-delete-number">Number to delete</label>
+					<input id="numbered-delete-number" class="modal-input" type="number" min="1" step="1" inputmode="numeric" />
+					<p id="numbered-delete-error" class="numbered-delete-error" aria-live="polite"></p>
+					<div class="modal-actions">
+						<button id="numbered-delete-confirm" type="button" class="settings-btn" hidden>Delete</button>
+						<button id="numbered-delete-all" type="button" class="settings-btn">Delete All</button>
+						<button id="numbered-delete-cancel" type="button" class="settings-btn">Cancel</button>
+					</div>
+				</div>`;
+			document.body.appendChild(overlay);
+			overlay.querySelector('#numbered-delete-title').textContent = title;
+			overlay.querySelector('#numbered-delete-description').textContent = description;
+			const itemList = overlay.querySelector('#numbered-delete-items');
+			items.forEach(item=>{
+				const row = document.createElement('li');
+				row.textContent = item;
+				itemList.appendChild(row);
+			});
+			const numberInput = overlay.querySelector('#numbered-delete-number');
+			const error = overlay.querySelector('#numbered-delete-error');
+			const deleteButton = overlay.querySelector('#numbered-delete-confirm');
+			const deleteAllButton = overlay.querySelector('#numbered-delete-all');
+			deleteAllButton.hidden = typeof onDeleteAll !== 'function';
+			numberInput.max = String(items.length);
+			numberInput.addEventListener('input',()=>{
+				const number = numberInput.valueAsNumber;
+				const valid = Number.isInteger(number) && number >= 1 && number <= items.length;
+				deleteButton.hidden = !valid;
+				error.textContent = numberInput.value && !valid ? 'Enter a number from 1 to ' + items.length + '.' : '';
+			});
+
+			function closeDialog(){ overlay.remove(); }
+			overlay.addEventListener('click',(event)=>{ if(event.target === overlay) closeDialog(); });
+			overlay.querySelector('#numbered-delete-cancel').addEventListener('click',closeDialog);
+			deleteButton.addEventListener('click',()=>{
+				const number = numberInput.valueAsNumber;
+				if(!Number.isInteger(number) || number < 1 || number > items.length){
+					error.textContent = 'Enter a number from 1 to ' + items.length + '.';
+					numberInput.focus();
+					return;
+				}
+				onDelete(number - 1);
+				closeDialog();
+			});
+			deleteAllButton.addEventListener('click',()=>{
+				if(confirm('Delete all listed items?')){
+					onDeleteAll();
+					closeDialog();
+				}
+			});
+			numberInput.addEventListener('keydown',(event)=>{
+				if(event.key === 'Enter') overlay.querySelector('#numbered-delete-confirm').click();
+				if(event.key === 'Escape') closeDialog();
+			});
+			overlay.querySelector('#numbered-delete-cancel').addEventListener('keydown',(event)=>{
+				if(event.key === 'Escape') closeDialog();
+			});
+			numberInput.focus();
+		}
+
+		try{
+			const savedPortfolioLinks = localStorage.getItem(PORTFOLIO_LINKS_KEY);
+			if(savedPortfolioLinks){
+				const parsedLinks = JSON.parse(savedPortfolioLinks);
+				if(Array.isArray(parsedLinks)){
+					portfolioLinks = parsedLinks.map(value=>{
+						try{ return normalizePortfolioLink(value); }catch(e){ return null; }
+					}).filter(Boolean);
+				}
+			} else {
+				const legacyLink = localStorage.getItem('dika_portfolio_link');
+				if(legacyLink){
+					portfolioLinks = [normalizePortfolioLink(legacyLink)];
+					localStorage.setItem(PORTFOLIO_LINKS_KEY,JSON.stringify(portfolioLinks));
+					localStorage.removeItem('dika_portfolio_link');
+				}
+			}
+			renderPortfolioLinks();
+		}catch(e){ console.warn('Failed to load portfolio links', e); }
+
+		if(portfolioLinkInput){
+			portfolioLinkInput.addEventListener('keydown',(e)=>{
+				if(e.key === 'Enter') e.preventDefault();
+			});
+		}
+		if(savePortfolioLinkBtn){
+			savePortfolioLinkBtn.addEventListener('click',()=>{
+				try{
+					const link = normalizePortfolioLink(portfolioLinkInput.value.trim());
+					if(portfolioLinks.includes(link)){
+						alert('That portfolio link is already saved.');
+						return;
+					}
+					const updatedLinks = [...portfolioLinks,link];
+					localStorage.setItem(PORTFOLIO_LINKS_KEY,JSON.stringify(updatedLinks));
+					portfolioLinks = updatedLinks;
+					portfolioLinkInput.value = '';
+					renderPortfolioLinks();
+				}catch(e){ alert('Enter a valid portfolio link beginning with https:// or http://.'); }
+			});
+		}
+		if(deletePortfolioLinkBtn){
+			deletePortfolioLinkBtn.addEventListener('click',()=>{
+				if(!portfolioLinks.length){ alert('There are no saved portfolio links to delete.'); return; }
+				showNumberedDeleteDialog(
+					'Delete Portfolio Link',
+					'Enter the folio number of the link you want to delete.',
+					portfolioLinks,
+					(index)=>{
+						portfolioLinks.splice(index,1);
+						if(portfolioLinks.length) localStorage.setItem(PORTFOLIO_LINKS_KEY,JSON.stringify(portfolioLinks));
+						else localStorage.removeItem(PORTFOLIO_LINKS_KEY);
+						renderPortfolioLinks();
+					},
+					()=>{
+						portfolioLinks = [];
+						localStorage.removeItem(PORTFOLIO_LINKS_KEY);
+						renderPortfolioLinks();
+					}
+				);
+			});
+		}
+
+		function renderTechnicianWriteup(value){
+			const writeup = typeof value === 'string' ? value : '';
+			technicianNotebookContent.textContent = writeup;
+			technicianNotebookContent.style.display = writeup ? 'block' : 'none';
+			technicianNotebookEmpty.style.display = writeup ? 'none' : 'block';
+			if(technicianWriteupInput) technicianWriteupInput.value = writeup;
+		}
+
+		try{
+			renderTechnicianWriteup(localStorage.getItem(TECHNICIAN_WRITEUP_KEY) || '');
+		}catch(e){
+			renderTechnicianWriteup('');
+		}
+
+		if(saveTechnicianWriteupBtn){
+			saveTechnicianWriteupBtn.addEventListener('click',()=>{
+				const writeup = technicianWriteupInput.value.trim();
+				if(!writeup){
+					technicianWriteupStatus.textContent = 'Paste the write-up before saving.';
+					return;
+				}
+				try{
+					localStorage.setItem(TECHNICIAN_WRITEUP_KEY,writeup);
+					renderTechnicianWriteup(writeup);
+					technicianWriteupStatus.textContent = 'Write-up saved.';
+				}catch(e){
+					technicianWriteupStatus.textContent = 'Could not save the write-up in this browser.';
+				}
+			});
+		}
+
+		const openTechnicianNotebookBtn = document.getElementById('open-technician-notebook');
+		const closeTechnicianNotebookBtn = document.getElementById('close-technician-notebook');
+		function closeTechnicianNotebook(){
+			technicianNotebookOverlay.style.display = 'none';
+			technicianNotebookOverlay.setAttribute('aria-hidden','true');
+		}
+		if(openTechnicianNotebookBtn){
+			openTechnicianNotebookBtn.addEventListener('click',()=>{
+				technicianNotebookOverlay.style.display = 'flex';
+				technicianNotebookOverlay.setAttribute('aria-hidden','false');
+				closeTechnicianNotebookBtn.focus();
+			});
+		}
+		if(closeTechnicianNotebookBtn) closeTechnicianNotebookBtn.addEventListener('click',closeTechnicianNotebook);
+		if(technicianNotebookOverlay){
+			technicianNotebookOverlay.addEventListener('click',(event)=>{
+				if(event.target === technicianNotebookOverlay) closeTechnicianNotebook();
+			});
+		}
+		document.addEventListener('keydown',(event)=>{
+			if(event.key === 'Escape' && technicianNotebookOverlay.style.display === 'flex'){
+				closeTechnicianNotebook();
+				openTechnicianNotebookBtn.focus();
+			}
+		});
+
+		function closeSettingsPanels(){
+			if(settingsMenu) settingsMenu.style.display = 'none';
+			if(settingsToggle){ settingsToggle.setAttribute('aria-expanded','false'); }
+			if(settingsMenu) settingsMenu.setAttribute('aria-hidden','true');
+			if(settingsQuickActions) settingsQuickActions.classList.remove('visible');
+		}
+
+		// password modal elements will be added to DOM
+		function createPasswordModal(){
+			if(document.getElementById('password-modal')) return;
+			const wrap = document.createElement('div');
+			wrap.id = 'password-modal'; wrap.className = 'modal-overlay'; wrap.style.display = 'none';
+			wrap.innerHTML = `
+				<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+					<h3 id="password-modal-title">Settings Password</h3>
+					<p id="password-modal-msg">Enter password to access settings.</p>
+					<input id="password-modal-input" class="modal-input" type="password" autocomplete="off" autocorrect="off" autocapitalize="off" inputmode="text" />
+					<div class="modal-actions">
+						<button id="password-modal-ok" class="settings-btn">OK</button>
+						<button id="password-modal-cancel" class="settings-btn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff">Cancel</button>
+					</div>
+				</div>`;
+			document.body.appendChild(wrap);
+
+			const ok = document.getElementById('password-modal-ok');
+			const cancel = document.getElementById('password-modal-cancel');
+			const input = document.getElementById('password-modal-input');
+
+			function hideModal(){ wrap.style.display = 'none'; input.value = ''; }
+
+			cancel.addEventListener('click', ()=>{ hideModal(); });
+			wrap.addEventListener('click', (e)=>{ if(e.target === wrap) hideModal(); });
+			input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') ok.click(); });
+
+			return {wrap, input, ok, hideModal};
+		}
+
+		function showPasswordFlow(onSuccess){
+			createPasswordModal();
+			const modal = document.getElementById('password-modal');
+			const input = document.getElementById('password-modal-input');
+			const ok = document.getElementById('password-modal-ok');
+			const msg = document.getElementById('password-modal-msg');
+			modal.style.display = 'flex';
+			// Delay focus slightly to improve on-screen keyboard reliability on mobile
+			setTimeout(()=>{
+				try{
+					input.focus();
+					input.select();
+					input.scrollIntoView({behavior:'smooth', block:'center'});
+				}catch(e){}
+			},50);
+
+			// Determine stored password
+			let stored = null;
+			try{ stored = localStorage.getItem('cv_settings_password'); }catch(e){ stored = null; }
+
+			if(!stored){
+				msg.textContent = 'Create a settings password (will be saved locally).';
+				ok.onclick = ()=>{
+					const val = input.value;
+					if(!val){ alert('Cancelled'); modal.style.display='none'; return; }
+					// ask for confirm using same modal
+					msg.textContent = 'Confirm password'; input.value = ''; input.focus();
+					ok.onclick = ()=>{
+						const confirm = input.value;
+						if(confirm !== val){ alert('Passwords do not match.'); modal.style.display='none'; return; }
+						try{ localStorage.setItem('cv_settings_password', val); }catch(e){}
+						modal.style.display='none'; alert('Password saved locally.');
+						if(typeof onSuccess === 'function') onSuccess();
+					};
+				};
+			} else {
+				msg.textContent = 'Enter settings password';
+				ok.onclick = ()=>{
+					const attempt = input.value;
+					if(attempt === stored){ modal.style.display='none'; if(typeof onSuccess === 'function') onSuccess(); }
+					else { alert('Incorrect password.'); }
+				};
+			}
+		}
+
+		if(settingsToggle && settingsMenu){
+			settingsToggle.addEventListener('click', ()=>{
+				const open = settingsMenu.style.display === 'block' || (settingsQuickActions && settingsQuickActions.classList.contains('visible'));
+				if(open){ closeSettingsPanels(); return; }
+				showPasswordFlow(()=>{
+					settingsMenu.style.display = 'block';
+					settingsToggle.setAttribute('aria-expanded','true');
+					settingsMenu.setAttribute('aria-hidden','false');
+					if(settingsQuickActions) settingsQuickActions.classList.add('visible');
+				});
+			});
+			document.addEventListener('click', (e)=>{
+				if(e.target.closest('#password-modal, #numbered-delete-modal')) return;
+				const clickInsideSettings = settingsMenu && settingsMenu.contains(e.target);
+				const clickInsideQuickActions = settingsQuickActions && settingsQuickActions.contains(e.target);
+				if(!clickInsideSettings && !clickInsideQuickActions && !settingsToggle.contains(e.target)){
+					closeSettingsPanels();
+				}
+			});
+		}
+		if(printResumeBtn){
+			printResumeBtn.addEventListener('click', ()=>{
+				// open a new window with resume content for printing
+				const content = document.getElementById('resume-content').innerHTML;
+				const win = window.open('','_blank');
+				win.document.write(`<html><head><title>Print Resume</title><style>body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;margin:20px;color:#111} h1{font-size:24px}</style></head><body>${content}</body></html>`);
+				win.document.close();
+				win.focus();
+				setTimeout(()=>{ win.print(); win.close(); },300);
+			});
+		}
+
+		// Session timer: 1 hour with periodic beep and timeout back to welcome
+		let sessionTimer = null;
+		let sessionRemaining = 0;
+
+		function beep(){
+			try{
+				const ctx = new (window.AudioContext || window.webkitAudioContext)();
+				const o = ctx.createOscillator();
+				const g = ctx.createGain();
+				o.type = 'sine'; o.frequency.value = 880;
+				o.connect(g); g.connect(ctx.destination); g.gain.value = 0.0001;
+				g.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.01);
+				setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.2); o.stop(); },220);
+				o.start();
+			}catch(e){ console.warn('beep failed', e); }
+		}
+
+		function startSessionTimer(){
+			clearSessionTimer();
+			sessionRemaining = 600; // 10 minutes
+			const sessEl = document.getElementById('session-count');
+			if(sessEl) sessEl.style.display = 'block';
+			updateSessionDisplay();
+			sessionTimer = setInterval(()=>{
+				sessionRemaining--;
+				updateSessionDisplay();
+				if(sessionRemaining <= 300 && sessionRemaining % 60 === 0) beep();
+				if(sessionRemaining <= 0){
+					clearSessionTimer();
+					beep(); setTimeout(beep,220); setTimeout(beep,440);
+					showTimeoutAndReturn();
+				}
+			},1000);
+		}
+
+		function updateSessionDisplay(){
+			const el = document.getElementById('session-count');
+			if(!el) return;
+			let s = sessionRemaining;
+			if(!s || s < 0) s = 0;
+			const hh = String(Math.floor(s/3600)).padStart(2,'0');
+			const mm = String(Math.floor((s%3600)/60)).padStart(2,'0');
+			const ss = String(s%60).padStart(2,'0');
+			el.textContent = `${hh}:${mm}:${ss}`;
+		}
+
+		function clearSessionTimer(){
+			if(sessionTimer){ clearInterval(sessionTimer); sessionTimer = null; }
+			sessionRemaining = 0;
+			const el = document.getElementById('session-count');
+			if(el) el.style.display = 'none';
+		}
+		function showTimeoutAndReturn(){
+			alert('Session timed out — returning to home.');
+			showWelcomeOverlay();
+		}
+
+		// Return/Home button handler
+		const returnBtn = document.getElementById('return-home');
+		if(returnBtn){
+			returnBtn.addEventListener('click', ()=>{
+				// Immediately show welcome overlay
+				showWelcomeOverlay();
+				clearSessionTimer();
+			});
+		}
+
+		let welcomeCountdownInterval = null;
+		let welcomeSeconds = 10;
+
+		function updateWelcomeCountdown(){
+			const countdown = document.getElementById('welcome-count');
+			if(countdown) countdown.textContent = welcomeSeconds > 0 ? `Welcome — ${welcomeSeconds}s` : 'Ready when you are';
+		}
+
+		function stopWelcomeCountdown(){
+			if(welcomeCountdownInterval){
+				clearInterval(welcomeCountdownInterval);
+				welcomeCountdownInterval = null;
+			}
+		}
+
+		function startWelcomeCountdown(){
+			stopWelcomeCountdown();
+			welcomeSeconds = 10;
+			updateWelcomeCountdown();
+			welcomeCountdownInterval = setInterval(()=>{
+				if(welcomeSeconds > 0) welcomeSeconds--;
+				updateWelcomeCountdown();
+				if(welcomeSeconds === 0) stopWelcomeCountdown();
+			},1000);
+		}
+
+		function showWelcomeOverlay(){
+			const welcome = document.getElementById('welcome');
+			const main = document.querySelector('main');
+			if(welcome){ welcome.classList.remove('welcome-hidden'); }
+			if(main){ main.classList.add('hidden'); }
+			startWelcomeCountdown();
+		}
+		startWelcomeCountdown();
+
+		function revealMainCV(){
+			const welcome = document.getElementById('welcome');
+			const main = document.querySelector('main');
+			if(welcome) welcome.classList.add('welcome-hidden');
+			if(main) main.classList.remove('hidden');
+			// Start the session timer and make sure the session time display is visible
+			startSessionTimer();
+			const sessEl = document.getElementById('session-count');
+			if(sessEl) sessEl.style.display = 'block';
+		}
+
+		// Open the portfolio only after an explicit user action
+		const skipBtn = document.getElementById('skip-welcome');
+		if(skipBtn){
+			skipBtn.addEventListener('click', (ev)=>{
+				ev.preventDefault(); ev.stopPropagation();
+				stopWelcomeCountdown();
+				revealMainCV();
+			});
+		}
+
+
+		// Avatar upload + center-square crop (client-side)
+		(function(){
+			const input = document.getElementById('avatar-input');
+			const changeMenuItem = document.getElementById('change-profile-image');
+			const avatarImg = document.getElementById('cv-avatar');
+
+			function loadFromLocal(){
+				try{
+					const data = localStorage.getItem('dika-avatar');
+					if(data){ avatarImg.src = data; }
+				}catch(e){/* ignore */}
+			}
+			loadFromLocal();
+
+			function openAvatarPicker(){
+				if(input){ input.click(); }
+				closeSettingsPanels();
+			}
+
+			if(changeMenuItem){ changeMenuItem.addEventListener('click', openAvatarPicker); }
+			if(quickProfileBtn){ quickProfileBtn.addEventListener('click', openAvatarPicker); }
+			if(input){
+				input.addEventListener('change',(e)=>{
+					const file = e.target.files && e.target.files[0];
+					if(!file) return;
+					const reader = new FileReader();
+					reader.onload = ()=>{
+						avatarImg.src = reader.result;
+						try{ localStorage.setItem('dika-avatar', reader.result); }catch(e){}
+					};
+					reader.readAsDataURL(file);
+					input.value = '';
+				});
+			}
+		})();
+
+		// Media Storage functionality
+		(function(){
+			const MAX_MEDIA = 600;
+			const STORAGE_KEY = 'dika_media_storage';
+			const uploadBtn = document.getElementById('upload-media-btn');
+			const fileInput = document.getElementById('storage-file-input');
+			const gallery = document.getElementById('storage-gallery');
+			const clearBtn = document.getElementById('clear-storage-btn');
+			const counter = document.getElementById('media-counter');
+			const storageInfo = document.getElementById('storage-info');
+
+			// Load media from localStorage on page load
+			function loadStorageFromLocal(){
+				try{
+					const data = localStorage.getItem(STORAGE_KEY);
+					if(data){
+						const items = JSON.parse(data);
+						items.forEach(item=>{
+							addMediaToGallery(item.data, item.type, item.name, false);
+						});
+						updateCounter();
+					}
+				}catch(e){ console.warn('Failed to load storage', e); }
+			}
+
+			function saveToStorage(){
+				try{
+					const items = [];
+					document.querySelectorAll('#storage-gallery [data-media-data]').forEach(el=>{
+						items.push({
+							data: el.getAttribute('data-media-data'),
+							type: el.getAttribute('data-media-type'),
+							name: el.getAttribute('data-media-name')
+						});
+					});
+					localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+				}catch(e){ console.warn('Failed to save storage', e); }
+			}
+
+			function updateMediaNumbers(){
+				gallery.querySelectorAll('[data-media-data]').forEach((item,index)=>{
+					const number = index + 1;
+					const badge = item.querySelector('.media-number');
+					if(badge){
+						badge.textContent = String(number);
+						badge.setAttribute('aria-label','Media number ' + number);
+					}
+					item.setAttribute('data-media-number',String(number));
+				});
+			}
+
+			function updateCounter(){
+				updateMediaNumbers();
+				const count = document.querySelectorAll('#storage-gallery [data-media-data]').length;
+				if(counter) counter.textContent = count + ' media';
+				if(storageInfo) storageInfo.textContent = count + ' / ' + MAX_MEDIA + ' media items';
+				if(count > 0 && counter) counter.style.display = 'block';
+			}
+
+			function addMediaToGallery(dataUrl, type, name, save = true){
+				if(gallery.querySelectorAll('[data-media-data]').length >= MAX_MEDIA){
+					alert('Storage limit reached! You can only store up to ' + MAX_MEDIA + ' media files.');
+					return;
+				}
+
+				const container = document.createElement('div');
+				container.style.position = 'relative';
+				container.style.width = '150px';
+				container.style.height = '150px';
+				container.setAttribute('data-media-data', dataUrl);
+				container.setAttribute('data-media-type', type);
+				container.setAttribute('data-media-name', name);
+				const numberBadge = document.createElement('span');
+				numberBadge.className = 'media-number';
+				numberBadge.setAttribute('aria-label','Media number');
+				container.appendChild(numberBadge);
+
+				if(type.startsWith('image/')){
+					const img = document.createElement('img');
+					img.src = dataUrl;
+					img.style.width = '100%';
+					img.style.height = '100%';
+					img.style.objectFit = 'cover';
+					img.style.borderRadius = '8px';
+					img.style.border = '1px solid rgba(255,255,255,0.1)';
+					container.appendChild(img);
+				} else if(type.startsWith('video/')){
+					const vid = document.createElement('video');
+					vid.src = dataUrl;
+					vid.style.width = '100%';
+					vid.style.height = '100%';
+					vid.style.objectFit = 'cover';
+					vid.style.borderRadius = '8px';
+					vid.style.border = '1px solid rgba(255,255,255,0.1)';
+					container.appendChild(vid);
+				}
+
+				gallery.appendChild(container);
+
+				if(save){
+					saveToStorage();
+					updateCounter();
+				}
+			}
+
+			if(uploadBtn){
+				uploadBtn.addEventListener('click',()=>{ fileInput.click(); });
+			}
+
+			if(fileInput){
+				fileInput.addEventListener('change',(e)=>{
+					Array.from(e.target.files).forEach(file=>{
+						const reader = new FileReader();
+						reader.onload = ()=>{
+							addMediaToGallery(reader.result, file.type, file.name);
+						};
+						reader.readAsDataURL(file);
+					});
+					fileInput.value = '';
+				});
+			}
+
+			if(clearBtn){
+				clearBtn.addEventListener('click',()=>{
+					const items = Array.from(gallery.querySelectorAll('[data-media-data]'));
+					if(!items.length){ alert('There are no uploaded media items to delete.'); return; }
+					const itemNames = items.map(item=>{
+						const type = item.getAttribute('data-media-type') || '';
+						const kind = type.startsWith('video/') ? 'Video' : 'Picture';
+						const name = item.getAttribute('data-media-name') || kind;
+						return kind + ' - ' + name;
+					});
+					showNumberedDeleteDialog(
+						'Delete Archived Media',
+						'Enter the number of the picture or video you want to delete.',
+						itemNames,
+						(index)=>{
+							items[index].remove();
+							saveToStorage();
+							updateCounter();
+						},
+						()=>{
+							gallery.innerHTML = '';
+							saveToStorage();
+							updateCounter();
+						}
+					);
+				});
+			}
+
+			// Load on page load
+			loadStorageFromLocal();
+		})();
+
+		// Change Password functionality
+		(function(){
+			const changePasswordBtn = document.getElementById('change-password-btn');
+			const changePasswordQuickBtn = quickChangePasswordBtn;
+			
+			function changePasswordFlow(){
+				closeSettingsPanels();
+				// Create change password flow
+				const currentPassword = localStorage.getItem('cv_settings_password') || null;
+				
+				// Step 1: Ask for current password if one exists
+				if(currentPassword){
+					const current = prompt('Enter current password:');
+					if(current === null) return;
+					if(current !== currentPassword){
+						alert('Incorrect current password.');
+						return;
+					}
+				}
+				
+				// Step 2: Ask for new password
+				const newPass = prompt('Enter new password:');
+				if(newPass === null) return;
+				if(!newPass){
+					alert('Password cannot be empty.');
+					return;
+				}
+				
+				// Step 3: Confirm new password
+				const confirmPass = prompt('Confirm new password:');
+				if(confirmPass === null) return;
+				if(confirmPass !== newPass){
+					alert('Passwords do not match.');
+					return;
+				}
+				
+				// Save new password
+				try{
+					localStorage.setItem('cv_settings_password', newPass);
+					alert('Password changed successfully! This also updates your gallery unlock password.');
+				}catch(e){
+					alert('Failed to change password.');
+				}
+			}
+			
+			if(changePasswordBtn){
+				changePasswordBtn.addEventListener('click', changePasswordFlow);
+			}
+			if(changePasswordQuickBtn){
+				changePasswordQuickBtn.addEventListener('click', changePasswordFlow);
+			}
+		})();
+
+		(function(){
+			const archiveInput = document.getElementById('storage-file-input');
+			const doVideoUpload = () => {
+				closeSettingsPanels();
+				if(archiveInput){
+					archiveInput.value = '';
+					archiveInput.click();
+				}
+			};
+			if(uploadVideoBtn){ uploadVideoBtn.addEventListener('click', doVideoUpload); }
+			if(quickUploadVideoBtn){ quickUploadVideoBtn.addEventListener('click', doVideoUpload); }
+		})();
+	</script>
+
+</body>
+</html>
