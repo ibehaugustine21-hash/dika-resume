@@ -1,2 +1,2 @@
-# dika-resume
+# dikaresume
 resume
